@@ -1,0 +1,96 @@
+Verna Dorian-Alexandru 334CC
+Tema 3 SO
+
+Organizare:
+
+-> Am urmat urmatorii pasi in implementare:
+    - am reluat laboratorul 6 pentru a reitera ce
+    tratarea unor astfel de semnale cu ajutorul
+    unui handler custom
+    - am completat functia so_init_loader
+    - am completat functia so_execute si in paralel
+    am realizat si functia handler
+
+-> Abordare generala:
+    - so_init_loader: practic aceasta functie este
+    similara cu cea folosita la laboratorul 6 in sursa
+    prot.c. Aici pur si simplu setez noul handler
+    si fac backup la setarile default in variabila
+    old_action (pe care o voi folosi pentru a da call
+    la handler-ul default).
+    - so_execute: Mapez memoria peste fisier, motiv
+    pentru care am nevoie de un file descriptor care
+    sa pointeze catre fisier. Am vazut pe forum ca avem
+    voie sa folosim o variabila globala in acest sens,
+    asa ca am declarat un int pentru a memora acest
+    file_desriptor pentru a-l apela in handler.
+    Initializarea acestuia se realizeaza in aceasta
+    functie. Apoi se parseaza executabilul. Dupa aceea
+    am ales sa initializez un vector de int (mapped)
+    pe care il folosesc pentru a retine cate pagini
+    dintr-un segment au fost deja mapate. Am observat
+    abia in ultima zi ca puteam sa folosesc si un camp
+    din structura de segment pentru a retine informatia
+    asta, dar deja era prea tarziu si am lasat asa.
+    Vectorul mapped este global. Apoi se face start exec
+    si mai apoi fac unmap pentru fiecare segment
+    - handler: acesta este handlerul custom pe care
+    l-am creat. In prima faza, verific daca semnalul este
+    sau nu SIGSEV. Daca nu este atunci dau call la
+    handlerul default. Dupa aceea incerc sa gasesc
+    segmentul in care se incadreaza adresa mea. Pentru
+    asta fac o cautare liniara in vectorul de segmente.
+    Daca adresa nu face parte dintr-un segment, atunci
+    dau call la handlerul default. Apoi numar paginile
+    pe care le am in acel segment. Daca toate acele
+    pagini au fost mapate, deci si segmentul a fost mapat,
+    atunci dau call la handler-ul default. O intrare din
+    vectorul mapped imi spune cate pagini au fost mapate.
+    Daca nu au fost mapate atatea pagini cate are segmentul,
+    atunci apelez mmap cu permisiuni de read si write.
+    Am ales aceste permisiuni pentru ca mapez pe fisier,
+    iar daca faceam cu permisiunile segmentului, atunci
+    primeam segfault (pentru ca mai apoi incerc sa scriu
+    zero-uri pentru cazurile speciale). Permisiunile le
+    rezolv la sfarsit de tot cand le schimb cu mprotect
+    in permisiunile segmentului. Incrementez intrarea din
+    mapped si pun zero-uri in cazul in care mem_size >
+    file_size. Apoi apelez mprotect pentru a seta
+    permisiunile dorite.
+    - comentarii: in general am incercat ca pe masura
+    ce implementez sa pun comentarii in cod (sper ca
+    se intelege ce am vrut sa zic in ele) pentru ca
+    imi e mai usor si mie daca fac asta
+
+
+-> Utilitate tema:
+    - Tema a fost destul de utila, mi-a placut pentru ca
+    am avut ocazia sa mai invat lucruri pe care nu am apucat
+    sa le inteleg in totalitate la laborator. Cu ocazia
+    temei a trebuit sa trec in revista si laboratorul:))
+
+-> Consider implementarea mea ca este ok, nu pot spune ca a
+    fost neaparat naiva, dar nici ca a fost cea mai eficienta.
+    Un lucru care cred ca ar fi fost mai eficient era sa
+    nu am vectorul mapped si sa folosesc campul din structura
+    pentru segment pentru a stoca informatia despre cate pagini
+    au fost mapate
+-> Am intalnit probleme la partea de permisiuni, pana cand am
+    realizat ca trebuie sa folosesc mprotect. Am mai avut
+    probleme la intelegerea enuntului, la inceput nu mi-am
+    dat seama ca un segment are mai multe pagini si tot
+    primeam seg fault si nu imi dadeam seama de ce.
+
+Implementare:
+-> Consider ca am implementat intreg-ul enunt al temei
+-> Nu consider ca exista functionalitati lipsa
+
+Resurse utilizate:
+https://ocw.cs.pub.ro/courses/so/laboratoare/laborator-05
+https://ocw.cs.pub.ro/courses/so/laboratoare/laborator-06
+
+
+Nu am un link pt repo-ul de git, nu am folosit versionare
+
+Verna Dorian-Alexandru 334CC
+Tema 3 SO
